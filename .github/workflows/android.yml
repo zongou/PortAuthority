@@ -1,0 +1,49 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "development" ]
+  pull_request:
+    branches: [ "development" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Build with Gradle
+      run: |
+        curl -Lk https://github.com/termux/termux-app/raw/master/app/testkey_untrusted.jks > app/testkey_untrusted.jks
+        echo "ZGlmZiAtLWdpdCBhL2FwcC9idWlsZC5ncmFkbGUgYi9hcHAvYnVpbGQuZ3JhZGxlCmluZGV4IGI3
+        MTkyNjkuLmQxNjM2ZmQgMTAwNjQ0Ci0tLSBhL2FwcC9idWlsZC5ncmFkbGUKKysrIGIvYXBwL2J1
+        aWxkLmdyYWRsZQpAQCAtMzcsNiArMzcsMTUgQEAgYW5kcm9pZCB7CiAgICAgICAgIHRhcmdldENv
+        bXBhdGliaWxpdHkgSmF2YVZlcnNpb24uVkVSU0lPTl8xXzgKICAgICB9CiAKKyAgICBzaWduaW5n
+        Q29uZmlncyB7CisgICAgICAgIGNvbmZpZyB7CisgICAgICAgIAlzdG9yZUZpbGUgZmlsZSgndGVz
+        dGtleV91bnRydXN0ZWQuamtzJykKKyAgICAgICAgICAgIGtleUFsaWFzICdhbGlhcycKKyAgICAg
+        ICAgICAgIHN0b3JlUGFzc3dvcmQgJ3hyajQ1eVdHTGJzTzdXMHYnCisgICAgICAgICAgICBrZXlQ
+        YXNzd29yZCAneHJqNDV5V0dMYnNPN1cwdicKKyAgICAgICAgfQorICAgIH0KKwogICAgIGJ1aWxk
+        VHlwZXMgewogICAgICAgICBkZWJ1ZyB7CiAgICAgICAgICAgICBtaW5pZnlFbmFibGVkIGZhbHNl
+        CkBAIC00Nyw2ICs1Niw3IEBAIGFuZHJvaWQgewogICAgICAgICAgICAgcHJvZ3VhcmRGaWxlcyBn
+        ZXREZWZhdWx0UHJvZ3VhcmRGaWxlKAogICAgICAgICAgICAgICAgICAgICAncHJvZ3VhcmQtYW5k
+        cm9pZC1vcHRpbWl6ZS50eHQnKSwKICAgICAgICAgICAgICAgICAgICAgJ3Byb2d1YXJkLXJ1bGVz
+        LnBybycKKyAgICAgICAgICAgIHNpZ25pbmdDb25maWcgc2lnbmluZ0NvbmZpZ3MuY29uZmlnCiAg
+        ICAgICAgIH0KICAgICB9CiAK
+        " | base64 -d | patch --strip=1
+        chmod +x gradlew
+        ./gradlew build
+        tree app
+      
+    - name: Upload Apk
+      uses: actions/upload-artifact@v3
+      with:
+        name: PortAuthority
+        path: app/build/outputs/apk
